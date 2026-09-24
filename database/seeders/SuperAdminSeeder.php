@@ -25,5 +25,44 @@ class SuperAdminSeeder extends Seeder
         Role::create(['name' => 'Super Admin']);
         $user->assignRole('Super Admin');
 
+        $user->syncPermissions([
+            'users.view',
+            'users.create',
+            'users.update',
+            'users.delete',
+            'stations.view',
+            'stations.create',
+            'stations.update',
+            'stations.delete',
+            'chargers.view',
+            'chargers.create',
+            'chargers.update',
+            'chargers.delete',
+            'reservations.view',
+            'reservations.create',
+            'reservations.update',
+            'reservations.delete',
+            'sessions.view',
+            'sessions.create',
+            'sessions.update',
+            'sessions.delete',
+            'pricing.view',
+            'pricing.create',
+            'pricing.update',
+            'pricing.delete',
+            'payments.view',
+            'payments.create',
+            'payments.update',
+            'payments.delete',
+            'tickets.view',
+            'tickets.create',
+            'tickets.update',
+            'tickets.delete',
+            'roles.view',
+            'roles.create',
+            'roles.update',
+            'roles.delete',
+        ]);
+
     }
 }

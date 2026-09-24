@@ -1,21 +1,29 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\dashboard\Analytics;
-use App\Http\Controllers\layouts\WithoutMenu;
-use App\Http\Controllers\layouts\WithoutNavbar;
-use App\Http\Controllers\layouts\Fluid;
-use App\Http\Controllers\layouts\Container;
-use App\Http\Controllers\layouts\Blank;
-use App\Http\Controllers\pages\AccountSettingsAccount;
-use App\Http\Controllers\pages\AccountSettingsNotifications;
-use App\Http\Controllers\pages\AccountSettingsConnections;
-use App\Http\Controllers\pages\MiscError;
-use App\Http\Controllers\pages\MiscUnderMaintenance;
+use App\Http\Controllers\authentications\ForgotPasswordBasic;
 use App\Http\Controllers\authentications\LoginBasic;
 use App\Http\Controllers\authentications\RegisterBasic;
-use App\Http\Controllers\authentications\ForgotPasswordBasic;
+use App\Http\Controllers\authentications\ResetPasswordController;
 use App\Http\Controllers\cards\CardBasic;
+use App\Http\Controllers\dashboard\Analytics;
+use App\Http\Controllers\extended_ui\PerfectScrollbar;
+use App\Http\Controllers\extended_ui\TextDivider;
+use App\Http\Controllers\form_elements\BasicInput;
+use App\Http\Controllers\form_elements\InputGroups;
+use App\Http\Controllers\form_layouts\HorizontalForm;
+use App\Http\Controllers\form_layouts\VerticalForm;
+use App\Http\Controllers\icons\Boxicons;
+use App\Http\Controllers\layouts\Blank;
+use App\Http\Controllers\layouts\Container;
+use App\Http\Controllers\layouts\Fluid;
+use App\Http\Controllers\layouts\WithoutMenu;
+use App\Http\Controllers\layouts\WithoutNavbar;
+use App\Http\Controllers\pages\AccountSettingsAccount;
+use App\Http\Controllers\pages\AccountSettingsConnections;
+use App\Http\Controllers\pages\AccountSettingsNotifications;
+use App\Http\Controllers\pages\MiscError;
+use App\Http\Controllers\pages\MiscUnderMaintenance;
+use App\Http\Controllers\tables\Basic as TablesBasic;
 use App\Http\Controllers\user_interface\Accordion;
 use App\Http\Controllers\user_interface\Alerts;
 use App\Http\Controllers\user_interface\Badges;
@@ -35,16 +43,12 @@ use App\Http\Controllers\user_interface\TabsPills;
 use App\Http\Controllers\user_interface\Toasts;
 use App\Http\Controllers\user_interface\TooltipsPopovers;
 use App\Http\Controllers\user_interface\Typography;
-use App\Http\Controllers\extended_ui\PerfectScrollbar;
-use App\Http\Controllers\extended_ui\TextDivider;
-use App\Http\Controllers\icons\Boxicons;
-use App\Http\Controllers\form_elements\BasicInput;
-use App\Http\Controllers\form_elements\InputGroups;
-use App\Http\Controllers\form_layouts\VerticalForm;
-use App\Http\Controllers\form_layouts\HorizontalForm;
-use App\Http\Controllers\tables\Basic as TablesBasic;
+use App\Http\Controllers\Web\RoleManagementController;
+use App\Http\Controllers\Web\UserManagementController;
+use Illuminate\Support\Facades\Route;
 
-// Main Page Route
+Route::group(['middleware' => 'auth'], function () {
+    // Main Page Route
 Route::get('/', [Analytics::class, 'index'])->name('dashboard-analytics');
 
 // layout
@@ -61,10 +65,7 @@ Route::get('/pages/account-settings-connections', [AccountSettingsConnections::c
 Route::get('/pages/misc-error', [MiscError::class, 'index'])->name('pages-misc-error');
 Route::get('/pages/misc-under-maintenance', [MiscUnderMaintenance::class, 'index'])->name('pages-misc-under-maintenance');
 
-// authentication
-Route::get('/auth/login-basic', [LoginBasic::class, 'index'])->name('auth-login-basic');
-Route::get('/auth/register-basic', [RegisterBasic::class, 'index'])->name('auth-register-basic');
-Route::get('/auth/forgot-password-basic', [ForgotPasswordBasic::class, 'index'])->name('auth-reset-password-basic');
+
 
 // cards
 Route::get('/cards/basic', [CardBasic::class, 'index'])->name('cards-basic');
@@ -107,3 +108,39 @@ Route::get('/form/layouts-horizontal', [HorizontalForm::class, 'index'])->name('
 
 // tables
 Route::get('/tables/basic', [TablesBasic::class, 'index'])->name('tables-basic');
+
+
+
+Route::get('/user-management', [UserManagementController::class, 'index'])->name('user-management.index');
+
+Route::delete('/user-management/{user}', [UserManagementController::class, 'destroy'])->name('user-management.destroy');
+
+Route::put('/user-management/{user}', [UserManagementController::class, 'update'])->name('user-management.update');
+
+Route::post('/user-management', [UserManagementController::class, 'store'])->name('user-management.store');
+
+Route::get( '/roles-permissions', [RoleManagementController::class, 'index'] )->name('role-permission.index'); 
+
+Route::post( '/roles-permissions', [RoleManagementController::class, 'store'] )->name('role-permission.store'); 
+
+Route::put( '/roles-permissions/{role}', [RoleManagementController::class, 'update'] )->name('role-permission.update'); 
+
+Route::delete( '/roles-permissions/{role}', [RoleManagementController::class, 'destroy'] )->name('role-permission.destroy');
+
+});
+
+
+Route::group(['middleware' => 'guest'], function () {
+    Route::get('/auth/login', [LoginBasic::class, 'index'])->name('login');
+    Route::get('/auth/register', [RegisterBasic::class, 'index'])->name('register');
+    
+    Route::get('/auth/forgot-password', [ForgotPasswordBasic::class, 'index'])->name('password.request');
+
+    Route::post('/auth/forgot-password', [ForgotPasswordBasic::class, 'send'])->name('password.email');
+
+    Route::get('/reset-password/{token}', [ResetPasswordController::class, 'index'])->name('password.reset');
+    Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
+
+    Route::post('/v1/admin/auth/login', [LoginBasic::class, 'Login'])->name('login.submit');
+
+});

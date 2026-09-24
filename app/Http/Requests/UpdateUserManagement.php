@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
-class LoginRequest extends FormRequest
+class UpdateUserManagement extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -23,8 +23,11 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'email' => ['required', 'string', 'email'],
-            'password' => ['required', 'string', 'min:8'],
+            'full_name' => ['sometimes', 'string', 'max:255'],
+            'email' => ['sometimes', 'email', 'unique:users,email,' . $this->route('user')->id],
+            'phone_number' => ['sometimes', 'string', 'max:255', 'unique:users,phone_number,' . $this->route('user')->id],
+            'password' => ['sometimes', 'nullable', 'string', 'min:8'],
+            'role' => ['sometimes', 'string', 'exists:roles,name'],
         ];
     }
 }
