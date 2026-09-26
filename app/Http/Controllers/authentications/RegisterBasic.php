@@ -13,13 +13,4 @@ class RegisterBasic extends Controller
   {
     return view('content.authentications.auth-register-basic');
   }
-
-  public function store(LoginRequest $request): RedirectResponse
-  {
-    $request->authenticate();
-
-    $request->session()->regenerate();
-
-    return redirect()->intended(route('dashboard', absolute: false));
-  }
 }

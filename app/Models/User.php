@@ -4,7 +4,9 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Enums\UserStatus;
+use App\Support\PhoneNumberNormalizer;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens;
@@ -12,8 +14,8 @@ use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles, HasFactory, HasApiTokens;
+    /** @use HasFactory<UserFactory> */
+    use HasApiTokens, HasFactory, HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -34,7 +36,7 @@ class User extends Authenticatable
      *
      * @var string
      */
-    protected $guard_name = 'web'; 
+    protected $guard_name = 'web';
 
     /**
      * The attributes that should be hidden for serialization.
@@ -45,6 +47,11 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    public function setPhoneNumberAttribute(string $phoneNumber): void
+    {
+        $this->attributes['phone_number'] = PhoneNumberNormalizer::normalize($phoneNumber);
+    }
 
     /**
      * Get the attributes that should be cast.
@@ -57,6 +64,17 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'status' => UserStatus::class,
+            'phone_verified_at' => 'datetime',
         ];
+    }
+
+    public function otpCodes(): HasMany
+    {
+        return $this->hasMany(OtpCode::class);
+    }
+
+    public function hasVerifiedPhone(): bool
+    {
+        return ! is_null($this->phone_verified_at);
     }
 }

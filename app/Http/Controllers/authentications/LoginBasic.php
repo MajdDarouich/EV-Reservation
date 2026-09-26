@@ -14,7 +14,7 @@ class LoginBasic extends Controller
     return view('content.authentications.auth-login-basic');
   }
 
-  function Login(LoginRequest $request)
+  public function Login(LoginRequest $request)
   {
     try {
 
@@ -32,5 +32,20 @@ class LoginBasic extends Controller
     ]);
     }
     
+  }
+
+  public function Logout(Request $request)
+  {
+    Auth::logout();
+    $request->session()->invalidate();
+    $request->session()->regenerateToken();
+    return redirect('/auth/login');
+  }
+
+  public function currentProfile()
+  {
+    return view('content.pages.profile', [
+      'user' => Auth::user(),
+    ]);
   }
 }

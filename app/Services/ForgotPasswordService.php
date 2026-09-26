@@ -17,7 +17,7 @@ class ForgotPasswordService
     public function sendResetLink(array $data)
     {
         $status = Password::sendResetLink(
-            $data['email']
+            ['email' => $data['email']]
         );
 
         return $status === Password::RESET_LINK_SENT

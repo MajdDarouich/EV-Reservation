@@ -15,13 +15,13 @@
           <div class="card-body">
             <!-- Logo -->
             <div class="app-brand justify-content-center">
-              <a href="{{ url('/') }}" class="app-brand-link gap-2">
+              
                 <span class="app-brand-logo demo">@include('_partials.macros')</span>
-                <span class="app-brand-text demo text-heading fw-bold">{{ config('variables.templateName') }}</span>
-              </a>
+                <span class="app-brand-text demo text-heading fw-bold">EV Reservation</span>
+              
             </div>
             <!-- /Logo -->
-            <h4 class="mb-1">Welcome to {{ config('variables.templateName') }}! 👋</h4>
+            <h4 class="mb-1">Welcome to EV Reservation! 👋</h4>
             <p class="mb-6">Please sign-in to your account and start the adventure</p>
 
             <form id="formAuthentication" class="mb-6" action="{{ route('login.submit') }}" method="POST">
@@ -47,11 +47,7 @@
               </div>
               <div class="mb-8">
                 <div class="d-flex justify-content-between">
-                  <div class="form-check mb-0">
-                    <input class="form-check-input" type="checkbox" id="remember-me" />
-                    <label class="form-check-label" for="remember-me"> Remember Me </label>
-                  </div>
-                  <a href="{{ url('auth/forgot-password-basic') }}">
+                  <a href="{{ url('auth/forgot-password') }}">
                     <span>Forgot Password?</span>
                   </a>
                 </div>
@@ -61,15 +57,9 @@
               </div>
             </form>
 
-            <p class="text-center">
-              <span>New on our platform?</span>
-              <a href="{{ url('auth/register-basic') }}">
-                <span>Create an account</span>
-              </a>
-            </p>
+            
           </div>
         </div>
-        <!-- /Register -->
       </div>
     </div>
   </div>
