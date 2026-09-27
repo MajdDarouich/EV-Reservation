@@ -13,7 +13,7 @@ class ForgotPasswordController extends Controller
 
     public function sendResetLink(ForgotPasswordApiRequest $request)
     {
-        $response = $this->service->sendResetLink($request->validated('email'));
+        $response = $this->service->sendResetCode($request->validated('phone_number'));
 
         return response()->json([
             'message' => $response['message'],

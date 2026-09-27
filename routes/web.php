@@ -51,9 +51,6 @@ Route::group(['middleware' => 'auth'], function () {
     // Main Page Route
     Route::get('/', [Analytics::class, 'index'])->name('dashboard-analytics');
 
-    Route::delete('/auth/logout', [LoginBasic::class, 'Logout'])->name('logout');
-    Route::get('/profile', [LoginBasic::class, 'currentProfile'])->name('profile');
-
     // layout
     Route::get('/layouts/without-menu', [WithoutMenu::class, 'index'])->name('layouts-without-menu');
     Route::get('/layouts/without-navbar', [WithoutNavbar::class, 'index'])->name('layouts-without-navbar');
@@ -110,35 +107,38 @@ Route::group(['middleware' => 'auth'], function () {
     // tables
     Route::get('/tables/basic', [TablesBasic::class, 'index'])->name('tables-basic');
 
-    Route::get('/user-management', [UserManagementController::class, 'index'])->name('user-management.index');
-
-    Route::delete('/user-management/{user}', [UserManagementController::class, 'destroy'])->name('user-management.destroy');
-
-    Route::put('/user-management/{user}', [UserManagementController::class, 'update'])->name('user-management.update');
-
-    Route::post('/user-management', [UserManagementController::class, 'store'])->name('user-management.store');
-
-    Route::get('/roles-permissions', [RoleManagementController::class, 'index'])->name('role-permission.index');
-
-    Route::post('/roles-permissions', [RoleManagementController::class, 'store'])->name('role-permission.store');
-
-    Route::put('/roles-permissions/{role}', [RoleManagementController::class, 'update'])->name('role-permission.update');
-
-    Route::delete('/roles-permissions/{role}', [RoleManagementController::class, 'destroy'])->name('role-permission.destroy');
-
 });
 
-Route::group(['middleware' => 'guest'], function () {
-    Route::get('/auth/login', [LoginBasic::class, 'index'])->name('login');
-    Route::get('/auth/register', [RegisterBasic::class, 'index'])->name('register');
+Route::prefix('/admin/auth')->middleware('guest')->group(function () {
+    Route::get('/login', [LoginBasic::class, 'index'])->name('login');
+    Route::get('/register', [RegisterBasic::class, 'index'])->name('register');
 
-    Route::get('/auth/forgot-password', [ForgotPasswordBasic::class, 'index'])->name('password.request');
+    Route::get('/forgot-password', [ForgotPasswordBasic::class, 'index'])->name('password.request');
 
-    Route::post('/auth/forgot-password', [ForgotPasswordBasic::class, 'sendResetLink'])->name('password.email');
+    Route::post('/forgot-password', [ForgotPasswordBasic::class, 'sendResetLink'])->name('password.email');
 
     Route::get('/reset-password/{token}', [ResetPasswordController::class, 'index'])->name('password.reset');
     Route::post('/reset-password', [ResetPasswordController::class, 'reset'])->name('password.update');
 
-    Route::post('/v1/admin/auth/login', [LoginBasic::class, 'Login'])->name('login.submit');
+    Route::post('/login', [LoginBasic::class, 'Login'])->name('login.submit');
 
+});
+
+Route::prefix('/admin')->middleware(['auth', 'AdminOrStaff'])->group(function () {
+
+    Route::get('/admins', [UserManagementController::class, 'index'])->name('user-management.index');
+    Route::post('/admins', [UserManagementController::class, 'store'])->name('user-management.store');
+    Route::post('/admins/{id}/roles', [UserManagementController::class, 'updateRoles'])->name('user-management.roles');
+    Route::put('/admins/{id}', [UserManagementController::class, 'update'])->name('user-management.update');
+    Route::delete('/admins/{id}', [UserManagementController::class, 'destroy'])->name('user-management.destroy');
+
+    Route::get('/permissions', [RoleManagementController::class, 'index'])->name('permissions.index');
+    Route::get('/roles', [RoleManagementController::class, 'index'])->name('role-permission.index');
+    Route::post('/roles', [RoleManagementController::class, 'store'])->name('role-permission.store');
+    Route::put('/roles/{id}', [RoleManagementController::class, 'update'])->name('role-permission.update');
+    Route::delete('/roles/{id}', [RoleManagementController::class, 'destroy'])->name('role-permission.destroy');
+
+    Route::delete('/auth/logout', [LoginBasic::class, 'Logout'])->name('logout');
+
+    Route::get('/profile', [LoginBasic::class, 'currentProfile'])->name('profile');
 });

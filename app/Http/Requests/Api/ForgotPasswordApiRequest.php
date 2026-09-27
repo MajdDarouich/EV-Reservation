@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Api;
 
+use App\Support\PhoneNumberNormalizer;
 use Illuminate\Foundation\Http\FormRequest;
 
 class ForgotPasswordApiRequest extends FormRequest
@@ -11,13 +12,22 @@ class ForgotPasswordApiRequest extends FormRequest
         return true;
     }
 
+    protected function prepareForValidation(): void
+    {
+        if ($this->filled('phone_number')) {
+            $this->merge([
+                'phone_number' => PhoneNumberNormalizer::normalize($this->phone_number),
+            ]);
+        }
+    }
+
     /**
      * @return array<string, array<mixed>|string>
      */
     public function rules(): array
     {
         return [
-            'email' => ['required', 'email'],
+            'phone_number' => ['required', 'string', 'exists:users,phone_number'],
         ];
     }
 }

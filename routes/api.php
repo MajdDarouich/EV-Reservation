@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -20,4 +21,5 @@ Route::middleware('guest:api')->group(function () {
 
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthenticationController::class, 'logout']);
+    Route::get('/profile', [ProfileController::class, 'getProfile']);
 });

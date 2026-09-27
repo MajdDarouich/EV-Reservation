@@ -51,17 +51,24 @@ class UserManagementController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateUserManagement $request, User $user)
+    public function update(UpdateUserManagement $request, User $id)
     {
         $data = $request->validated();
-        return $this->service->updateUser($user->id, $data);
+        return $this->service->updateUser($id->id, $data);
+    }
+
+    public function updateRoles(UpdateUserManagement $request, User $id)
+    {
+        return $this->service->updateUser($id->id, [
+            'role' => $request->validated('role'),
+        ]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(User $user)
+    public function destroy(User $id)
     {
-        return $this->service->deleteUser($user->id);
+        return $this->service->deleteUser($id->id);
     }
 }

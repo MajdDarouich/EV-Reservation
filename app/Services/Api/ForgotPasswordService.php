@@ -5,52 +5,55 @@ namespace App\Services\Api;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
 
 class ForgotPasswordService
 {
-    public function sendResetLink(string $email): array
-    {
-        $status = Password::sendResetLink(['email' => $email]);
+    public function __construct(protected OtpService $otpService) {}
 
-        if ($status === Password::RESET_LINK_SENT) {
-            return [
-                'message' => __($status),
-                'status' => 200,
-            ];
-        }
+    public function sendResetCode(string $phoneNumber): array
+    {
+        $user = User::where('phone_number', $phoneNumber)->firstOrFail();
+        $this->otpService->generateAndSend(
+            $user,
+            'Your password reset code is: %s. It expires in 5 minutes.'
+        );
 
         return [
-            'message' => __($status),
-            'status' => 422,
+            'message' => 'A password reset code has been sent to your phone.',
+            'status' => 200,
         ];
     }
 
     public function resetPassword(array $data): array
     {
-        $status = Password::reset(
-            $data,
-            function (User $user, string $password): void {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                    'remember_token' => Str::random(60),
-                ])->save();
+        $user = User::where('phone_number', $data['phone_number'])->firstOrFail();
+        $latestOtp = $this->otpService->latestUnverified($user);
 
-                event(new PasswordReset($user));
-            }
-        );
-
-        if ($status === Password::PASSWORD_RESET) {
+        if ($latestOtp && $latestOtp->attempts >= 5) {
             return [
-                'message' => __($status),
-                'status' => 200,
+                'message' => 'Too many attempts. Request a new OTP.',
+                'status' => 429,
             ];
         }
 
+        if (! $this->otpService->verifyCode($user, $data['otp'])) {
+            return [
+                'message' => 'Invalid or expired OTP.',
+                'status' => 422,
+            ];
+        }
+
+        $user->forceFill([
+            'password' => Hash::make($data['password']),
+            'remember_token' => Str::random(60),
+        ])->save();
+
+        event(new PasswordReset($user));
+
         return [
-            'message' => __($status),
-            'status' => 422,
+            'message' => 'Password has been reset successfully.',
+            'status' => 200,
         ];
     }
 }

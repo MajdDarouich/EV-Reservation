@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreRoleRequest;
 use App\Http\Requests\UpdateRoleRequest;
 use App\Services\RoleManagementService;
-use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 
 class RoleManagementController extends Controller
@@ -38,17 +37,17 @@ class RoleManagementController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdateRoleRequest $request, Role $role)
+    public function update(UpdateRoleRequest $request, Role $id)
     {
         $data = $request->validated();
-        return $this->Service->update($data, $role->id);
+        return $this->Service->update($data, $id->id);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Role $role)
+    public function destroy(Role $id)
     {
-        return $this->Service->destroy($role->id);
+        return $this->Service->destroy($id->id);
     }
 }

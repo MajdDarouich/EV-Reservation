@@ -17,7 +17,7 @@ class OtpService
         //
     }
 
-    public function generateAndSend(User $user): OtpCode
+    public function generateAndSend(User $user, string $message = 'Your verification code is: %s. It expires in 5 minutes.'): OtpCode
     {
         $user->otpCodes()
             ->whereNull('verified_at')
@@ -30,7 +30,7 @@ class OtpService
 
         if (! $this->sendViaUltraMsg(
             $user->phone_number,
-            "Your verification code is: {$otp->code}. It expires in 5 minutes."
+            sprintf($message, $otp->code)
         )) {
             $otp->delete();
 
@@ -41,6 +41,17 @@ class OtpService
     }
 
     public function verify(User $user, string $code): bool
+    {
+        if (! $this->verifyCode($user, $code)) {
+            return false;
+        }
+
+        $user->forceFill(['phone_verified_at' => now()])->save();
+
+        return true;
+    }
+
+    public function verifyCode(User $user, string $code): bool
     {
         /** @var OtpCode|null $otp */
         $otp = $user->otpCodes()
@@ -59,8 +70,6 @@ class OtpService
         }
 
         $otp->update(['verified_at' => now()]);
-
-        $user->forceFill(['phone_verified_at' => now()])->save();
 
         return true;
     }
