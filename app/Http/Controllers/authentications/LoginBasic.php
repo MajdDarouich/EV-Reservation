@@ -39,7 +39,7 @@ class LoginBasic extends Controller
     Auth::logout();
     $request->session()->invalidate();
     $request->session()->regenerateToken();
-    return redirect('/auth/login');
+    return redirect()->route('login');
   }
 
   public function currentProfile()

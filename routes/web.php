@@ -44,6 +44,7 @@ use App\Http\Controllers\user_interface\Toasts;
 use App\Http\Controllers\user_interface\TooltipsPopovers;
 use App\Http\Controllers\user_interface\Typography;
 use App\Http\Controllers\Web\RoleManagementController;
+use App\Http\Controllers\Web\StationManagementController;
 use App\Http\Controllers\Web\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
@@ -141,4 +142,9 @@ Route::prefix('/admin')->middleware(['auth', 'AdminOrStaff'])->group(function ()
     Route::delete('/auth/logout', [LoginBasic::class, 'Logout'])->name('logout');
 
     Route::get('/profile', [LoginBasic::class, 'currentProfile'])->name('profile');
+
+    Route::get('stations', [StationManagementController::class, 'index'])->name('stations.index');
+    Route::post('stations', [StationManagementController::class, 'store'])->name('stations.store');
+    Route::put('stations/{station}', [StationManagementController::class, 'update'])->name('stations.update');
+    Route::delete('stations/{station}', [StationManagementController::class, 'destroy'])->name('stations.destroy');
 });

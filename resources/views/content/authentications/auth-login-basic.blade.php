@@ -15,10 +15,10 @@
           <div class="card-body">
             <!-- Logo -->
             <div class="app-brand justify-content-center">
-              
-                <span class="app-brand-logo demo">@include('_partials.macros')</span>
-                <span class="app-brand-text demo text-heading fw-bold">EV Reservation</span>
-              
+
+              <span class="app-brand-logo demo">@include('_partials.macros')</span>
+              <span class="app-brand-text demo text-heading fw-bold">EV Reservation</span>
+
             </div>
             <!-- /Logo -->
             <h4 class="mb-1">Welcome to EV Reservation! 👋</h4>
@@ -47,7 +47,7 @@
               </div>
               <div class="mb-8">
                 <div class="d-flex justify-content-between">
-                  <a href="{{ url('auth/forgot-password') }}">
+                  <a href="{{ route('password.request') }}">
                     <span>Forgot Password?</span>
                   </a>
                 </div>
@@ -57,7 +57,7 @@
               </div>
             </form>
 
-            
+
           </div>
         </div>
       </div>

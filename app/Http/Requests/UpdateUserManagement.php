@@ -27,6 +27,7 @@ class UpdateUserManagement extends FormRequest
             'phone_number' => ['sometimes', 'string', 'max:255', 'unique:users,phone_number,'.$this->route('id')->id],
             'password' => ['sometimes', 'nullable', 'string', 'min:8'],
             'role' => ['sometimes', 'string', 'exists:roles,name'],
+            'status' => ['sometimes', 'string', 'in:Active,Suspended'],
         ];
     }
 }

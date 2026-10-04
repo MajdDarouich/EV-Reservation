@@ -152,16 +152,22 @@
       "menuHeader": "Apps & Pages"
     },
     {
-      "url": "/user-management",
+      "url": "/admin/admins",
       "name": "User Management",
       "icon": "menu-icon icon-base bx bx-group",
-      "slug": "user-management"
+      "slug": "user-management.index"
     },
     {
-      "url": "/roles-permissions",
+      "url": "/admin/stations",
+      "name": "Station Management",
+      "icon": "menu-icon icon-base bx bx-map-pin",
+      "slug": "stations.index"
+    },
+    {
+      "url": "/admin/roles",
       "name": "Roles & Permissions",
       "icon": "menu-icon icon-base bx bx-lock",
-      "slug": "roles-permissions"
+      "slug": "role-permission.index"
     },
     {
       "url": "https://demos.themeselection.com/sneat-bootstrap-html-laravel-admin-template/demo-1/app/email",

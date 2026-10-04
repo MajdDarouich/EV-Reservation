@@ -179,6 +179,18 @@ class AuthenticationService
                 ];
             }
 
+            $lastLoginAt = $user->last_login_at ?? $user->created_at;
+
+            if ($lastLoginAt && $lastLoginAt->lte(now()->subMonths(6))) {
+                $user->forceFill(['status' => UserStatus::SUSPENDED])->save();
+                DB::commit();
+
+                return [
+                    'message' => 'Your account was suspended because it has been inactive for six months.',
+                    'status' => 403,
+                ];
+            }
+
             if (! $user->hasVerifiedPhone()) {
                 DB::commit();
 
@@ -188,6 +200,7 @@ class AuthenticationService
                 ];
             }
 
+            $user->forceFill(['last_login_at' => now()])->save();
             $token = $user->createToken('auth_token')->accessToken;
 
             DB::commit();

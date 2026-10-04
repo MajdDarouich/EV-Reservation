@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\UserStatus;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -20,6 +21,7 @@ class UserManagementService
 
         try {
             $user = User::create($data);
+            $user->forceFill(['phone_verified_at' => now()])->save();
             $user->assignRole($role);
 
             DB::commit();
@@ -35,6 +37,7 @@ class UserManagementService
     {
         $user = User::findOrFail($id);
         $role = $data['role'] ?? null;
+        $status = $data['status'] ?? null;
         unset($data['role']);
 
         if ($user->hasRole('Super Admin') && $role !== null && $role !== 'Super Admin') {
@@ -53,6 +56,10 @@ class UserManagementService
 
         try {
             $user->update($data);
+
+            if ($status === UserStatus::ACTIVE->value && $user->wasChanged('status')) {
+                $user->forceFill(['last_login_at' => now()])->save();
+            }
 
             if ($role !== null) {
                 $user->syncRoles($role);
@@ -79,5 +86,4 @@ class UserManagementService
 
         return back()->with('success', 'User deleted successfully.');
     }
-    
 }

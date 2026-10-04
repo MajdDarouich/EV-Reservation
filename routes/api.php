@@ -22,4 +22,6 @@ Route::middleware('guest:api')->group(function () {
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthenticationController::class, 'logout']);
     Route::get('/profile', [ProfileController::class, 'getProfile']);
+    Route::patch('/profile', [ProfileController::class, 'updateProfile']);
+    Route::delete('/profile', [ProfileController::class, 'deleteAccount']);
 });

@@ -65,6 +65,7 @@ class User extends Authenticatable
             'password' => 'hashed',
             'status' => UserStatus::class,
             'phone_verified_at' => 'datetime',
+            'last_login_at' => 'datetime',
         ];
     }
 
@@ -76,5 +77,10 @@ class User extends Authenticatable
     public function hasVerifiedPhone(): bool
     {
         return ! is_null($this->phone_verified_at);
+    }
+
+    public function vehicles(): HasMany
+    {
+        return $this->hasMany(Vehicle::class);
     }
 }
