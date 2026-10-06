@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Web\StripeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -24,4 +25,5 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/profile', [ProfileController::class, 'getProfile']);
     Route::patch('/profile', [ProfileController::class, 'updateProfile']);
     Route::delete('/profile', [ProfileController::class, 'deleteAccount']);
+    Route::post("/stripe/webhook", [StripeController::class, "handle"]);
 });
