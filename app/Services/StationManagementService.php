@@ -12,19 +12,36 @@ class StationManagementService
     {
         $search = $data['search'] ?? null;
 
-        $stations = Station::with('stationWorkingHours')
-            ->when($search, function ($query) use ($search) {
-                $query->where(function ($q) use ($search) {
-                    $q->where('name', 'like', "%{$search}%")
-                        ->orWhere('address', 'like', "%{$search}%")
-                        ->orWhere('city', 'like', "%{$search}%")
-                        ->orWhere('country', 'like', "%{$search}%");
-                });
-            })
+        $filtered = fn () => Station::query()->when($search, function ($query) use ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                    ->orWhere('address', 'like', "%{$search}%")
+                    ->orWhere('city', 'like', "%{$search}%")
+                    ->orWhere('country', 'like', "%{$search}%");
+            });
+        });
+
+        $stations = $filtered()
+            ->with('stationWorkingHours')
             ->latest()
             ->paginate(10);
 
-        return view('content.station-management.index', compact('stations'));
+        $mapStations = $filtered()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->get(['id', 'name', 'address', 'city', 'status', 'latitude', 'longitude', 'avg_rating'])
+            ->map(fn ($s) => [
+                'id' => $s->id,
+                'name' => $s->name,
+                'address' => $s->address,
+                'city' => $s->city,
+                'status' => $s->status->value,
+                'lat' => (float) $s->latitude,
+                'lng' => (float) $s->longitude,
+                'rating' => number_format((float) $s->avg_rating, 2),
+            ]);
+
+        return view('content.station-management.index', compact('stations', 'mapStations'));
     }
 
     public function store(array $data)

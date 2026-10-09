@@ -17,6 +17,25 @@
         </div>
       @endif
 
+      {{-- Stations Map --}}
+      <div class="card mb-6">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+          <div>
+            <h5 class="mb-0">Stations Map</h5>
+            <small class="text-body">Click a marker to see station details</small>
+          </div>
+          <div class="d-flex gap-2">
+            <span class="badge bg-label-success">Active</span>
+            <span class="badge bg-label-warning">Maintenance</span>
+            <span class="badge bg-label-secondary">Inactive</span>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div id="stationsMap" style="height: 420px; width: 100%;"></div>
+        </div>
+      </div>
+      {{-- /Stations Map --}}
+
       <div class="card mb-6">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-4">
           <div>
@@ -116,6 +135,10 @@
                         <i class="icon-base bx bx-dots-vertical-rounded"></i>
                       </button>
                       <div class="dropdown-menu">
+                        <a class="dropdown-item show-on-map" href="javascript:void(0);"
+                          data-id="{{ $station->id }}">
+                          <i class="icon-base bx bx-map-pin me-1"></i> Show on map
+                        </a>
                         <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal"
                           data-bs-target="#editStationModal{{ $station->id }}">
                           <i class="icon-base bx bx-edit-alt me-1"></i> Edit
@@ -152,7 +175,7 @@
                           <div class="mb-6">
                             <label for="stationName{{ $station->id }}" class="form-label">Station Name</label>
                             <div class="input-group input-group-merge">
-                              <span class="input-group-text"><i class="icon-base bx bx-charging-station"></i></span>
+                              <span class="input-group-text"><i class="icon-base bx bx-map-pin"></i></span>
                               <input type="text" id="stationName{{ $station->id }}" name="name"
                                 class="form-control" value="{{ $station->name }}" />
                             </div>
@@ -371,6 +394,14 @@
                 @enderror
               </div>
             </div>
+
+            {{-- Location picker map --}}
+            <div class="mb-6">
+              <label class="form-label">Pick location on map</label>
+              <div id="pickerMap" style="height: 250px; width: 100%;" class="rounded border"></div>
+              <small class="text-body-secondary">Click the map to fill latitude and longitude.</small>
+            </div>
+
             <div class="row g-4 mb-6">
               <div class="col-md-6">
                 <label for="latitude" class="form-label">Latitude</label>
@@ -522,4 +553,132 @@
     </div>
   </div>
   {{-- /Add Station Modal --}}
+
+  {{-- Leaflet --}}
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const stations = @json($mapStations);
+      const DEFAULT_CENTER = [33.5138, 36.2765]; // Damascus
+      const tileUrl = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+      const attribution = '&copy; OpenStreetMap contributors';
+      const statusColors = {
+        Active: '#16a34a',
+        Maintenance: '#f59e0b',
+        Inactive: '#6c757d'
+      };
+
+      // Escape text before putting it into popup HTML
+      const esc = (value) => {
+        const div = document.createElement('div');
+        div.textContent = value ?? '';
+        return div.innerHTML;
+      };
+
+      // ---------- Main stations map ----------
+      const mapEl = document.getElementById('stationsMap');
+      if (mapEl) {
+        const map = L.map('stationsMap').setView(DEFAULT_CENTER, 11);
+        L.tileLayer(tileUrl, {
+          maxZoom: 19,
+          attribution
+        }).addTo(map);
+
+        const markers = {};
+        const group = L.featureGroup();
+
+        stations.forEach(function(s) {
+          const marker = L.circleMarker([s.lat, s.lng], {
+            radius: 9,
+            color: '#ffffff',
+            weight: 2,
+            fillColor: statusColors[s.status] ?? '#6c757d',
+            fillOpacity: 1
+          }).bindPopup(
+            '<strong>' + esc(s.name) + '</strong><br>' +
+            esc(s.address) + (s.city ? ', ' + esc(s.city) : '') + '<br>' +
+            'Status: ' + esc(s.status) + '<br>' +
+            'Rating: ' + esc(s.rating) + ' / 5'
+          );
+          markers[s.id] = marker;
+          group.addLayer(marker);
+        });
+
+        group.addTo(map);
+        if (stations.length) {
+          map.fitBounds(group.getBounds().pad(0.2));
+        }
+
+        // "Show on map" action in the table
+        document.querySelectorAll('.show-on-map').forEach(function(el) {
+          el.addEventListener('click', function() {
+            const marker = markers[el.dataset.id];
+            if (!marker) return;
+            mapEl.scrollIntoView({
+              behavior: 'smooth',
+              block: 'center'
+            });
+            map.setView(marker.getLatLng(), 15);
+            marker.openPopup();
+          });
+        });
+      }
+
+      // ---------- Location picker inside the Add modal ----------
+      const addModal = document.getElementById('addStationModal');
+      const latInput = document.getElementById('latitude');
+      const lngInput = document.getElementById('longitude');
+      let pickerMap = null;
+      let pickerMarker = null;
+
+      function setPickerMarker(latlng) {
+        if (pickerMarker) {
+          pickerMarker.setLatLng(latlng);
+        } else {
+          pickerMarker = L.marker(latlng).addTo(pickerMap);
+        }
+      }
+
+      addModal.addEventListener('shown.bs.modal', function() {
+        if (!pickerMap) {
+          pickerMap = L.map('pickerMap').setView(DEFAULT_CENTER, 11);
+          L.tileLayer(tileUrl, {
+            maxZoom: 19,
+            attribution
+          }).addTo(pickerMap);
+
+          pickerMap.on('click', function(e) {
+            latInput.value = e.latlng.lat.toFixed(7);
+            lngInput.value = e.latlng.lng.toFixed(7);
+            setPickerMarker(e.latlng);
+          });
+
+          // Move the marker when coordinates are typed manually
+          [latInput, lngInput].forEach(function(input) {
+            input.addEventListener('change', function() {
+              const lat = parseFloat(latInput.value);
+              const lng = parseFloat(lngInput.value);
+              if (!isNaN(lat) && !isNaN(lng)) {
+                setPickerMarker([lat, lng]);
+                pickerMap.setView([lat, lng], 14);
+              }
+            });
+          });
+
+          // Restore marker if the form came back with old values
+          const oldLat = parseFloat(latInput.value);
+          const oldLng = parseFloat(lngInput.value);
+          if (!isNaN(oldLat) && !isNaN(oldLng)) {
+            setPickerMarker([oldLat, oldLng]);
+            pickerMap.setView([oldLat, oldLng], 14);
+          }
+        }
+
+        // The container was hidden when the map was created, so recalculate its size
+        pickerMap.invalidateSize();
+      });
+    });
+  </script>
 @endsection
