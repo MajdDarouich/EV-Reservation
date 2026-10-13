@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('charging_types', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
+            $table->string('code');
+            $table->string('current_type');
+            $table->decimal('power_kwh', 8, 2);
         });
     }
 
