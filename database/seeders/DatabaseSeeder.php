@@ -2,9 +2,13 @@
 
 namespace Database\Seeders;
 
+use Database\Seeders\ChargerSeeder;
+use Database\Seeders\ChargingTypeSeeder;
+use Database\Seeders\PermissionSeeder;
+use Database\Seeders\RoleSeeder;
+use Database\Seeders\SuperAdminSeeder;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Artisan;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Laravel\Passport\Client;
 
 class DatabaseSeeder extends Seeder
@@ -19,6 +23,8 @@ class DatabaseSeeder extends Seeder
             PermissionSeeder::class,
             SuperAdminSeeder::class,
             RoleSeeder::class,
+            ChargingTypeSeeder::class,
+            ChargerSeeder::class,
         ]);
 
         $hasPersonalAccessClient = Client::query()

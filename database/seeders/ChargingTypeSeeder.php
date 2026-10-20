@@ -22,7 +22,10 @@ class ChargingTypeSeeder extends Seeder
         ];
 
         foreach ($chargingTypes as $type) {
-            ChargingType::create($type);
+            ChargingType::updateOrCreate(
+                ['code' => $type['code']],
+                $type,
+            );
         }
     }
 }

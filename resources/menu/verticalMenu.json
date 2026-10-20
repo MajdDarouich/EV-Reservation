@@ -170,6 +170,12 @@
       "slug": "role-permission.index"
     },
     {
+      "url":"/admin/chargers",
+      "name":"Charger Management",
+      "icon":"menu-icon icon-base bx bx-plug",
+      "slug":"chargers.index"
+    },
+    {
       "url": "https://demos.themeselection.com/sneat-bootstrap-html-laravel-admin-template/demo-1/app/email",
       "name": "Email",
       "icon": "menu-icon icon-base bx bx-envelope",

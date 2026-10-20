@@ -13,7 +13,6 @@ class Charger extends Model
         'manufacturer',
         'model',
         'firmware_version',
-        'power_kwh',
         'status',
         'default_overstay_fee_amount',
         'default_overstay_interval_minutes',

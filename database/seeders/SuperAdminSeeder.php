@@ -15,14 +15,16 @@ class SuperAdminSeeder extends Seeder
      */
     public function run(): void
     {
-        $user = User::create([
-            'full_name' => 'Majd Darouich',
-            'email' => 'majddarouich2005@gmail.com',
-            'phone_number' => '0998413827',
-            'password' => Hash::make('password'),
-        ]);
-        
-        Role::create(['name' => 'Super Admin']);
+        $user = User::updateOrCreate(
+            ['email' => 'majddarouich2005@gmail.com'],
+            [
+                'full_name' => 'Majd Darouich',
+                'phone_number' => '0998413827',
+                'password' => Hash::make('password'),
+            ],
+        );
+
+        Role::firstOrCreate(['name' => 'Super Admin']);
         $user->assignRole('Super Admin');
 
         $user->syncPermissions([

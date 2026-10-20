@@ -16,7 +16,7 @@ class StationService
 
     public function index(float $lat, float $lon)
     {
-        $stations = Station::with('StationWorkingHours')->get();
+        $stations = Station::query()->with('stationWorkingHours')->get();
 
         foreach ($stations as $station) {
             $station->distance_km = round($this->calculateDistance($station->latitude, $station->longitude, $lat, $lon), 2);
@@ -31,7 +31,9 @@ class StationService
 
     public function searchByAddress(float $lat, float $lon, string $address)
     {
-        $stations = Station::where('address', 'like', '%' . $address . '%')->get();
+        $stations = Station::query()
+            ->where('address', 'like', '%' . $address . '%')
+            ->get();
 
         foreach ($stations as $station) {
             $station->distance_km = round($this->calculateDistance($station->latitude, $station->longitude, $lat, $lon), 2);

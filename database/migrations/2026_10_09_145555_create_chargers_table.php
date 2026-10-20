@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('chargers', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Station::class)->constrained()->cascadeOnDelete();
+            $table->foreignIdFor(Station::class)->nullable()->constrained()->cascadeOnDelete();
             $table->foreignIdFor(ChargingType::class)->constrained()->cascadeOnDelete();
             $table->timestamps();
             $table->string('serial_number');

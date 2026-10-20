@@ -23,7 +23,7 @@ class Station extends Model
         'default_overstay_interval_minutes',
         'cancellation_window_minutes',
         'no_show_period_days',
-        'avg_rating'
+        'avg_rating',
     ];
 
     public function stationWorkingHours()
@@ -34,5 +34,10 @@ class Station extends Model
     protected $casts = [
         'status' => StationStatus::class,
     ];
+
+    public function chargers()
+    {
+        return $this->hasMany(Charger::class);
+    }
 
 }

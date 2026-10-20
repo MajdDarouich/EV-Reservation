@@ -43,6 +43,7 @@ use App\Http\Controllers\user_interface\TabsPills;
 use App\Http\Controllers\user_interface\Toasts;
 use App\Http\Controllers\user_interface\TooltipsPopovers;
 use App\Http\Controllers\user_interface\Typography;
+use App\Http\Controllers\Web\ChargerManagementController;
 use App\Http\Controllers\Web\RoleManagementController;
 use App\Http\Controllers\Web\StationManagementController;
 use App\Http\Controllers\Web\UserManagementController;
@@ -147,4 +148,11 @@ Route::prefix('/admin')->middleware(['auth', 'AdminOrStaff'])->group(function ()
     Route::post('stations', [StationManagementController::class, 'store'])->name('stations.store');
     Route::put('stations/{station}', [StationManagementController::class, 'update'])->name('stations.update');
     Route::delete('stations/{station}', [StationManagementController::class, 'destroy'])->name('stations.destroy');
+
+    Route::get('chargers', [ChargerManagementController::class, 'index'])->name('chargers.index');
+    Route::post('chargers/attach', [ChargerManagementController::class, 'attach'])->name('chargers.attach');
+    Route::patch('chargers/{charger}/detach', [ChargerManagementController::class, 'detach'])->name('chargers.detach');
+    Route::patch('chargers/{charger}/out-of-service', [ChargerManagementController::class, 'markOutOfService'])->name('chargers.out-of-service');
+    Route::patch('chargers/{charger}/available', [ChargerManagementController::class, 'markAvailable'])->name('chargers.available');
+    Route::put('chargers/{charger}', [ChargerManagementController::class, 'update'])->name('chargers.update');
 });
