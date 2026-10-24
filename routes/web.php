@@ -44,6 +44,7 @@ use App\Http\Controllers\user_interface\Toasts;
 use App\Http\Controllers\user_interface\TooltipsPopovers;
 use App\Http\Controllers\user_interface\Typography;
 use App\Http\Controllers\Web\ChargerManagementController;
+use App\Http\Controllers\Web\ConnectorManagementController;
 use App\Http\Controllers\Web\RoleManagementController;
 use App\Http\Controllers\Web\StationManagementController;
 use App\Http\Controllers\Web\UserManagementController;
@@ -151,6 +152,10 @@ Route::prefix('/admin')->middleware(['auth', 'AdminOrStaff'])->group(function ()
 
     Route::get('chargers', [ChargerManagementController::class, 'index'])->name('chargers.index');
     Route::post('chargers/attach', [ChargerManagementController::class, 'attach'])->name('chargers.attach');
+    Route::post('chargers/{charger}/connectors', [ConnectorManagementController::class, 'store'])->name('chargers.connectors.store');
+    Route::put('connectors/{connector}', [ConnectorManagementController::class, 'update'])->name('connectors.update');
+    Route::patch('connectors/{connector}/out-of-service', [ConnectorManagementController::class, 'markOutOfService'])->name('connectors.out-of-service');
+    Route::patch('connectors/{connector}/available', [ConnectorManagementController::class, 'markAvailable'])->name('connectors.available');
     Route::patch('chargers/{charger}/detach', [ChargerManagementController::class, 'detach'])->name('chargers.detach');
     Route::patch('chargers/{charger}/out-of-service', [ChargerManagementController::class, 'markOutOfService'])->name('chargers.out-of-service');
     Route::patch('chargers/{charger}/available', [ChargerManagementController::class, 'markAvailable'])->name('chargers.available');

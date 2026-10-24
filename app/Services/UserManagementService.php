@@ -82,7 +82,16 @@ class UserManagementService
             abort(403, 'Cannot delete a Super Admin user.');
         }
 
-        $user->delete();
+        DB::beginTransaction();
+
+        try {
+            $user->delete();
+
+            DB::commit();
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
 
         return back()->with('success', 'User deleted successfully.');
     }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Api\UpdateProfileRequest;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ProfileController extends Controller
 {
@@ -20,21 +21,40 @@ class ProfileController extends Controller
 
     public function updateProfile(UpdateProfileRequest $request)
     {
-        $user = $request->user('api');
-        $user->update($request->validated());
+        DB::beginTransaction();
+
+        try {
+            $user = $request->user('api');
+            $user->update($request->validated());
+            $freshUser = $user->fresh();
+
+            DB::commit();
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
 
         return response()->json([
             'message' => 'Profile updated successfully.',
-            'user' => $user->fresh(),
+            'user' => $freshUser,
         ]);
     }
 
     public function deleteAccount(Request $request)
     {
-        /** @var User $user */
-        $user = $request->user('api');
-        $user->tokens()->update(['revoked' => true]);
-        $user->delete();
+        DB::beginTransaction();
+
+        try {
+            /** @var User $user */
+            $user = $request->user('api');
+            $user->tokens()->update(['revoked' => true]);
+            $user->delete();
+
+            DB::commit();
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
 
         return response()->json([
             'message' => 'Account deleted successfully.',

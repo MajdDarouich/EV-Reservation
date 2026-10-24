@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Password;
 
 class ForgotPasswordService
@@ -16,9 +17,18 @@ class ForgotPasswordService
 
     public function sendResetLink(array $data)
     {
-        $status = Password::sendResetLink(
-            ['email' => $data['email']]
-        );
+        DB::beginTransaction();
+
+        try {
+            $status = Password::sendResetLink(
+                ['email' => $data['email']]
+            );
+
+            DB::commit();
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
 
         return $status === Password::RESET_LINK_SENT
             ? back()->with('status', __($status))

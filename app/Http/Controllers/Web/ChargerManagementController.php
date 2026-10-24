@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 
 class ChargerManagementController extends Controller
 {
-
     public function __construct(protected ChargerManagementService $service)
     {
         //
@@ -36,38 +35,6 @@ class ChargerManagementController extends Controller
     public function detach(DetachChargerRequest $request, Charger $charger)
     {
         return $this->service->detach($charger, $request->validated());
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(Charger $charger)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Charger $charger)
-    {
-        //
     }
 
     /**

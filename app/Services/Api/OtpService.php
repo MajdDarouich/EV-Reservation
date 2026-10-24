@@ -4,6 +4,7 @@ namespace App\Services\Api;
 
 use App\Models\OtpCode;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -19,59 +20,87 @@ class OtpService
 
     public function generateAndSend(User $user, string $message = 'Your verification code is: %s. It expires in 5 minutes.'): OtpCode
     {
-        $user->otpCodes()
-            ->whereNull('verified_at')
-            ->delete();
+        DB::beginTransaction();
 
-        $otp = $user->otpCodes()->create([
-            'code' => (string) random_int(100000, 999999),
-            'expires_at' => now()->addMinutes(5),
-        ]);
+        try {
+            $user->otpCodes()
+                ->whereNull('verified_at')
+                ->delete();
 
-        if (! $this->sendViaUltraMsg(
-            $user->phone_number,
-            sprintf($message, $otp->code)
-        )) {
-            $otp->delete();
+            $otp = $user->otpCodes()->create([
+                'code' => (string) random_int(100000, 999999),
+                'expires_at' => now()->addMinutes(5),
+            ]);
 
-            throw new \RuntimeException('Unable to send the verification code.');
+            if (! $this->sendViaUltraMsg(
+                $user->phone_number,
+                sprintf($message, $otp->code)
+            )) {
+                throw new \RuntimeException('Unable to send the verification code.');
+            }
+
+            DB::commit();
+
+            return $otp;
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
         }
-
-        return $otp;
     }
 
     public function verify(User $user, string $code): bool
     {
-        if (! $this->verifyCode($user, $code)) {
-            return false;
+        DB::beginTransaction();
+
+        try {
+            if (! $this->verifyCode($user, $code)) {
+                DB::commit();
+
+                return false;
+            }
+
+            $user->forceFill(['phone_verified_at' => now()])->save();
+            DB::commit();
+
+            return true;
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
         }
-
-        $user->forceFill(['phone_verified_at' => now()])->save();
-
-        return true;
     }
 
     public function verifyCode(User $user, string $code): bool
     {
-        /** @var OtpCode|null $otp */
-        $otp = $user->otpCodes()
-            ->whereNull('verified_at')
-            ->latest()
-            ->first();
+        DB::beginTransaction();
 
-        if (! $otp || $otp->isExpired()) {
-            return false;
+        try {
+            /** @var OtpCode|null $otp */
+            $otp = $user->otpCodes()
+                ->whereNull('verified_at')
+                ->latest()
+                ->first();
+
+            if (! $otp || $otp->isExpired()) {
+                DB::commit();
+
+                return false;
+            }
+
+            if (! hash_equals($otp->code, $code)) {
+                $otp->increment('attempts');
+                DB::commit();
+
+                return false;
+            }
+
+            $otp->update(['verified_at' => now()]);
+            DB::commit();
+
+            return true;
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
         }
-
-        if (! hash_equals($otp->code, $code)) {
-            $otp->increment('attempts');
-
-            return false;
-        }
-
-        $otp->update(['verified_at' => now()]);
-
-        return true;
     }
 
     public function latestUnverified(User $user): ?OtpCode

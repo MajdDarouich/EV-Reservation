@@ -77,7 +77,6 @@
                 <th>Manufacturer</th>
                 <th>Model</th>
                 <th>Firmware</th>
-                <th>Charging Type</th>
                 <th>Power (kW)</th>
                 <th>Status</th>
                 <th>Actions</th>
@@ -86,17 +85,19 @@
             <tbody class="table-border-bottom-0">
               @forelse ($selectedStation->chargers as $charger)
                 @php
+                  $chargerStatus = $charger->status instanceof \BackedEnum
+                    ? $charger->status->value
+                    : (string) $charger->status;
                   $chargerColors = ['available' => 'success', 'reserved' => 'info', 'charging completed' => 'primary', 'out of service' => 'secondary'];
-                  $chargerColor = $chargerColors[strtolower($charger->status)] ?? 'secondary';
+                  $chargerColor = $chargerColors[strtolower($chargerStatus)] ?? 'secondary';
                 @endphp
                 <tr>
                   <td class="fw-medium">{{ $charger->serial_number }}</td>
                   <td>{{ $charger->manufacturer }}</td>
                   <td>{{ $charger->model }}</td>
                   <td>{{ $charger->firmware_version }}</td>
-                  <td>{{ $charger->chargingType?->code }} ({{ $charger->chargingType?->current_type }})</td>
-                  <td>{{ $charger->chargingType?->power_kwh }}</td>
-                  <td><span class="badge bg-label-{{ $chargerColor }}">{{ $charger->status }}</span></td>
+                  <td>{{ $charger->power_kw }}</td>
+                  <td><span class="badge bg-label-{{ $chargerColor }}">{{ $chargerStatus }}</span></td>
                   <td>
                     <div class="dropdown">
                       <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
@@ -106,6 +107,9 @@
                         @can('chargers.update')
                           <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#editChargerModal{{ $charger->id }}">
                             <i class="icon-base bx bx-edit-alt me-1"></i> Edit
+                          </a>
+                          <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#addConnectorModal{{ $charger->id }}">
+                            <i class="icon-base bx bx-plug me-1"></i> Add connector
                           </a>
                           <a class="dropdown-item" href="javascript:void(0);" onclick="document.getElementById('detachChargerForm{{ $charger->id }}').submit();">
                             <i class="icon-base bx bx-unlink me-1"></i> Remove from station
@@ -125,7 +129,7 @@
                 </tr>
               @empty
                 <tr>
-                  <td colspan="8" class="text-center py-6">No chargers at this station yet.</td>
+                  <td colspan="7" class="text-center py-6">No chargers at this station yet.</td>
                 </tr>
               @endforelse
             </tbody>
@@ -136,8 +140,11 @@
       {{-- Edit Charger Modals --}}
       @foreach ($selectedStation->chargers as $charger)
         @php
+          $chargerStatus = $charger->status instanceof \BackedEnum
+            ? $charger->status->value
+            : (string) $charger->status;
           $chargerColors = ['available' => 'success', 'reserved' => 'info', 'charging completed' => 'primary', 'out of service' => 'secondary'];
-          $chargerColor = $chargerColors[strtolower($charger->status)] ?? 'secondary';
+          $chargerColor = $chargerColors[strtolower($chargerStatus)] ?? 'secondary';
         @endphp
         <div class="modal fade" id="editChargerModal{{ $charger->id }}" tabindex="-1" aria-hidden="true">
           <div class="modal-dialog" role="document">
@@ -153,7 +160,7 @@
                   <div class="mb-6">
                     <label class="form-label">Status</label>
                     <div>
-                      <span class="badge bg-label-{{ $chargerColor }}">{{ $charger->status }}</span>
+                      <span class="badge bg-label-{{ $chargerColor }}">{{ $chargerStatus }}</span>
                     </div>
                   </div>
                   <div class="mb-6">
@@ -167,7 +174,7 @@
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
-                  @if (strtolower($charger->status) === 'out of service')
+                  @if (strtolower($chargerStatus) === 'out of service')
                     <button type="submit" form="availableForm{{ $charger->id }}" class="btn btn-label-success">
                       Mark as available
                     </button>
@@ -190,6 +197,152 @@
             </div>
           </div>
         </div>
+
+        <div class="modal fade" id="addConnectorModal{{ $charger->id }}" tabindex="-1" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <form method="POST" action="{{ route('chargers.connectors.store', $charger->id) }}">
+                @csrf
+                <div class="modal-header">
+                  <h5 class="modal-title">Add Connector to {{ $charger->serial_number }}</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                  @if ($charger->connectors->isNotEmpty())
+                    <div class="mb-5">
+                      <label class="form-label">Existing connectors</label>
+                      <ul class="list-group">
+                        @foreach ($charger->connectors as $connector)
+                          @php
+                            $connectorStatus = $connector->status instanceof \BackedEnum
+                              ? $connector->status->value
+                              : (string) $connector->status;
+                            $connectorColor = strtolower($connectorStatus) === 'available' ? 'success' : 'secondary';
+                          @endphp
+                          <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>
+                              #{{ $connector->number }} &middot;
+                              {{ $connector->code }} ({{ $connector->current_type }})
+                              <span class="badge bg-label-{{ $connectorColor }}">{{ $connectorStatus }}</span>
+                            </span>
+                            <span class="d-flex align-items-center gap-2">
+                              {{ $connector->max_power_kw }} kW
+                              <button type="button" class="btn btn-sm btn-icon btn-text-secondary" data-bs-toggle="modal" data-bs-target="#editConnectorModal{{ $connector->id }}" aria-label="Edit connector">
+                                <i class="icon-base bx bx-edit-alt"></i>
+                              </button>
+                            </span>
+                          </li>
+                        @endforeach
+                      </ul>
+                    </div>
+                  @endif
+                  <div class="mb-5">
+                    <label for="connector{{ $charger->id }}" class="form-label">Connector inventory</label>
+                    <select id="connector{{ $charger->id }}" name="connector_id" class="form-select" required>
+                      <option value="">Select a connector</option>
+                      @foreach ($availableConnectors->where('current_type', $charger->current_type) as $availableConnector)
+                        <option value="{{ $availableConnector->id }}" @selected(old('connector_id') == $availableConnector->id)>
+                          {{ $availableConnector->code }} ({{ $availableConnector->current_type }}, {{ $availableConnector->max_power_kw }} kW)
+                        </option>
+                      @endforeach
+                    </select>
+                  </div>
+                  <div class="mb-5">
+                    <label for="connectorNumber{{ $charger->id }}" class="form-label">Connector number (1-3)</label>
+                    <input type="number" min="1" max="3" id="connectorNumber{{ $charger->id }}" name="number" class="form-control" value="{{ old('number') }}" required />
+                  </div>
+                  @if ($errors->any())
+                    <div class="alert alert-danger mt-5 mb-0">
+                      <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                          <li>{{ $error }}</li>
+                        @endforeach
+                      </ul>
+                    </div>
+                  @endif
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="submit" class="btn btn-primary">Add connector</button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      @endforeach
+
+      @foreach ($selectedStation->chargers as $charger)
+        @foreach ($charger->connectors as $connector)
+          @php
+            $connectorStatus = $connector->status instanceof \BackedEnum
+              ? $connector->status->value
+              : (string) $connector->status;
+            $connectorColor = strtolower($connectorStatus) === 'available' ? 'success' : 'secondary';
+          @endphp
+          <div class="modal fade" id="editConnectorModal{{ $connector->id }}" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                <form method="POST" action="{{ route('connectors.update', $connector->id) }}">
+                  @csrf
+                  @method('PUT')
+                  <div class="modal-header">
+                    <h5 class="modal-title">Edit Connector</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="mb-5">
+                      <label for="connectorCodeEdit{{ $connector->id }}" class="form-label">Connector code</label>
+                      <select id="connectorCodeEdit{{ $connector->id }}" name="code" class="form-select" required>
+                        <option value="">Select connector code</option>
+                        @foreach ($connectorInventory->where('current_type', $charger->current_type)->pluck('code')->unique() as $connectorCode)
+                          <option value="{{ $connectorCode }}" @selected($connector->code === $connectorCode)>{{ $connectorCode }}</option>
+                        @endforeach
+                      </select>
+                    </div>
+                    <div class="mb-5">
+                      <label for="connectorTypeEdit{{ $connector->id }}" class="form-label">Current type</label>
+                      <select id="connectorTypeEdit{{ $connector->id }}" name="current_type" class="form-select" required>
+                        <option value="AC" @selected($connector->current_type === 'AC')>AC</option>
+                        <option value="DC" @selected($connector->current_type === 'DC')>DC</option>
+                      </select>
+                      <small class="text-body">Must match the charger's current type ({{ $charger->current_type }}).</small>
+                    </div>
+                    <div class="mb-5">
+                      <label for="connectorNumberEdit{{ $connector->id }}" class="form-label">Connector number (1-3)</label>
+                      <input type="number" min="1" max="3" id="connectorNumberEdit{{ $connector->id }}" name="number" class="form-control" value="{{ $connector->number }}" required />
+                    </div>
+                    <div class="mb-0">
+                      <label for="connectorPowerEdit{{ $connector->id }}" class="form-label">Maximum power (kW)</label>
+                      <select id="connectorPowerEdit{{ $connector->id }}" name="max_power_kw" class="form-select" required>
+                        <option value="">Select maximum power</option>
+                        @foreach ($connectorInventory->where('current_type', $charger->current_type)->pluck('max_power_kw')->unique()->sort() as $connectorPower)
+                          <option value="{{ $connectorPower }}" @selected((float) $connector->max_power_kw === (float) $connectorPower)>{{ $connectorPower }} kW</option>
+                        @endforeach
+                      </select>
+                    </div>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">Close</button>
+                    @if (strtolower($connectorStatus) === 'out of service')
+                      <button type="submit" form="connectorAvailableForm{{ $connector->id }}" class="btn btn-label-success">Mark available</button>
+                    @else
+                      <button type="submit" form="connectorOutOfServiceForm{{ $connector->id }}" class="btn btn-label-danger">Mark out of service</button>
+                    @endif
+                    <button type="submit" class="btn btn-primary">Save changes</button>
+                  </div>
+                </form>
+                <form id="connectorOutOfServiceForm{{ $connector->id }}" method="POST" action="{{ route('connectors.out-of-service', $connector->id) }}" class="d-none" onsubmit="return confirm('Mark this connector as out of service?');">
+                  @csrf
+                  @method('PATCH')
+                </form>
+                <form id="connectorAvailableForm{{ $connector->id }}" method="POST" action="{{ route('connectors.available', $connector->id) }}" class="d-none">
+                  @csrf
+                  @method('PATCH')
+                </form>
+              </div>
+            </div>
+          </div>
+        @endforeach
       @endforeach
 
       {{-- Add (attach) Chargers Modal: pick from unassigned chargers already in the database --}}

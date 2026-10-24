@@ -4,9 +4,10 @@ namespace App\Services;
 
 use App\Enums\ChargerStatus;
 use App\Models\Charger;
-use App\Models\ChargingType;
+use App\Models\Connector;
 use App\Models\Station;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class ChargerManagementService
 {
@@ -21,13 +22,19 @@ class ChargerManagementService
     public function index(Request $request)
     {
         $stations = Station::query()
-            ->with('chargers.chargingType')
+            ->with('chargers.connectors')
             ->orderBy('name')
             ->get();
 
         $selectedStation = $stations->firstWhere('id', $request->integer('station_id'));
-        $chargingTypes = ChargingType::query()
+        $availableConnectors = Connector::query()
+            ->whereNull('charger_id')
             ->orderBy('code')
+            ->orderBy('max_power_kw')
+            ->get();
+        $connectorInventory = Connector::query()
+            ->orderBy('code')
+            ->orderBy('max_power_kw')
             ->get();
         $availableChargers = Charger::query()
             ->when(
@@ -41,14 +48,29 @@ class ChargerManagementService
             ->orderBy('serial_number')
             ->get();
 
-        return view('content.charger-management.index', compact('stations', 'selectedStation', 'availableChargers', 'chargingTypes'));
+        return view('content.charger-management.index', compact(
+            'stations',
+            'selectedStation',
+            'availableChargers',
+            'availableConnectors',
+            'connectorInventory'
+        ));
     }
 
     public function attach(array $data)
     {
-        $station = Station::query()->findOrFail($data['station_id']);
-        Charger::whereIn('id', $data['charger_ids'])
-            ->update(['station_id' => $station->id]);
+        DB::beginTransaction();
+
+        try {
+            $station = Station::query()->findOrFail($data['station_id']);
+            Charger::whereIn('id', $data['charger_ids'])
+                ->update(['station_id' => $station->id]);
+
+            DB::commit();
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
 
         return redirect()
             ->route('chargers.index', ['station_id' => $station->id])
@@ -57,7 +79,16 @@ class ChargerManagementService
 
     public function detach(Charger $charger, array $data)
     {
-        $charger->update(['station_id' => null]);
+        DB::beginTransaction();
+
+        try {
+            $charger->update(['station_id' => null]);
+
+            DB::commit();
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
 
         return redirect()
             ->route('chargers.index', ['station_id' => $data['station_id']])
@@ -66,7 +97,16 @@ class ChargerManagementService
 
     public function update(Charger $charger, array $data)
     {
-        $charger->update($data);
+        DB::beginTransaction();
+
+        try {
+            $charger->update($data);
+
+            DB::commit();
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
 
         return redirect()
             ->route('chargers.index', ['station_id' => $charger->station_id])
@@ -75,7 +115,16 @@ class ChargerManagementService
 
     public function markOutOfService(Charger $charger)
     {
-        $charger->update(['status' => ChargerStatus::OUT_OF_SERVICE->value]);
+        DB::beginTransaction();
+
+        try {
+            $charger->update(['status' => ChargerStatus::OUT_OF_SERVICE->value]);
+
+            DB::commit();
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
 
         return redirect()
             ->route('chargers.index', ['station_id' => $charger->station_id])
@@ -84,7 +133,16 @@ class ChargerManagementService
 
     public function markAvailable(Charger $charger)
     {
-        $charger->update(['status' => ChargerStatus::AVAILABLE->value]);
+        DB::beginTransaction();
+
+        try {
+            $charger->update(['status' => ChargerStatus::AVAILABLE->value]);
+
+            DB::commit();
+        } catch (\Throwable $exception) {
+            DB::rollBack();
+            throw $exception;
+        }
 
         return redirect()
             ->route('chargers.index', ['station_id' => $charger->station_id])
