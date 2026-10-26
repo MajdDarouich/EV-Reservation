@@ -300,12 +300,8 @@
                       </select>
                     </div>
                     <div class="mb-5">
-                      <label for="connectorTypeEdit{{ $connector->id }}" class="form-label">Current type</label>
-                      <select id="connectorTypeEdit{{ $connector->id }}" name="current_type" class="form-select" required>
-                        <option value="AC" @selected($connector->current_type === 'AC')>AC</option>
-                        <option value="DC" @selected($connector->current_type === 'DC')>DC</option>
-                      </select>
-                      <small class="text-body">Must match the charger's current type ({{ $charger->current_type }}).</small>
+                      <label class="form-label">Current type</label>
+                      <input type="text" class="form-control" value="DC" readonly />
                     </div>
                     <div class="mb-5">
                       <label for="connectorNumberEdit{{ $connector->id }}" class="form-label">Connector number (1-3)</label>

@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\StationController;
+use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Web\StripeController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -29,4 +30,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post("/stripe/webhook", [StripeController::class, "handle"]);
     Route::get('/stations', [StationController::class, 'index']);
     Route::get('/stations/search', [StationController::class, 'searchByAddress']);
+    Route::get('/vehicles', [VehicleController::class, 'index']);
+    Route::post('/vehicles/attach', [VehicleController::class, 'attach']);
+    Route::post('/vehicles/detach', [VehicleController::class, 'detach']);
+    Route::post('/vehicles/make-default', [VehicleController::class, 'makeDefault']);
+    Route::post('/vehicles/remove-default', [VehicleController::class, 'removeDefault']);
 });

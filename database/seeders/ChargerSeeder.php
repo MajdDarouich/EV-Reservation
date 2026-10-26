@@ -14,17 +14,6 @@ class ChargerSeeder extends Seeder
     {
         $chargers = [
             [
-                'code' => 'ABB-AC-003',
-                'manufacturer' => 'ABB',
-                'model' => 'Terra AC Wallbox',
-                'current_type' => 'AC',
-                'power_kw' => 22.0,
-                'serial_number' => 'ABB-AC-003',
-                'firmware_version' => '1.0.0',
-                'status' => 'Available',
-            ],
-
-            [
                 'code' => 'ABB-DC-001',
                 'manufacturer' => 'ABB',
                 'model' => 'Terra 54',
@@ -85,6 +74,8 @@ class ChargerSeeder extends Seeder
                 'status' => 'Available',
             ],
         ];
+
+        Charger::where('current_type', 'AC')->delete();
 
         foreach ($chargers as $charger) {
             Charger::updateOrCreate(

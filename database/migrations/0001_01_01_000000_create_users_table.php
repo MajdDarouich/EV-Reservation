@@ -24,6 +24,7 @@ return new class extends Migration
             $table->unsignedSmallInteger('no_show_count')->default(0);
             $table->unsignedSmallInteger('no_show_limit')->default(3);
             $table->rememberToken();
+            $table->softDeletes();
             $table->timestamps();
         });
 

@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             RoleSeeder::class,
             ChargerSeeder::class,
             ConnectorSeeder::class,
+            VehicleSeeder::class,
         ]);
 
         $hasPersonalAccessClient = Client::query()

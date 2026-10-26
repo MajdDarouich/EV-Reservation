@@ -30,12 +30,6 @@ class UpdateConnectorRequest extends FormRequest
                     ->where('current_type', $charger->current_type)
                     ->where('max_power_kw', $this->input('max_power_kw')),
             ],
-            'current_type' => [
-                'required',
-                'string',
-                'max:255',
-                Rule::in([$charger->current_type]),
-            ],
             'number' => [
                 'required',
                 'integer',

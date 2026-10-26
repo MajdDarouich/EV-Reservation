@@ -13,7 +13,6 @@ class ConnectorSeeder extends Seeder
     public function run(): void
     {
         $connectors = [
-            ['charger_id' => null, 'code' => 'Type2', 'current_type' => 'AC', 'number' => null, 'max_power_kw' => 22.0],
             ['charger_id' => null, 'code' => 'CCS2', 'current_type' => 'DC', 'number' => null, 'max_power_kw' => 50.0],
             ['charger_id' => null, 'code' => 'CCS2', 'current_type' => 'DC', 'number' => null, 'max_power_kw' => 100.0],
             ['charger_id' => null, 'code' => 'CCS2', 'current_type' => 'DC', 'number' => null, 'max_power_kw' => 150.0],
@@ -21,6 +20,8 @@ class ConnectorSeeder extends Seeder
             ['charger_id' => null, 'code' => 'CHAdeMO', 'current_type' => 'DC', 'number' => null, 'max_power_kw' => 50.0],
             ['charger_id' => null, 'code' => 'CHAdeMO', 'current_type' => 'DC', 'number' => null, 'max_power_kw' => 100.0],
         ];
+
+        Connector::where('code', 'Type2')->delete();
 
         foreach ($connectors as $connector) {
             Connector::updateOrCreate(

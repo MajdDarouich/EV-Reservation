@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Enums\ConnectorStatus;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Connector extends Model
 {
@@ -23,5 +24,10 @@ class Connector extends Model
     public function charger()
     {
         return $this->belongsTo(Charger::class);
+    }
+
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
     }
 }

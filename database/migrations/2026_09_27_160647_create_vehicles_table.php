@@ -14,7 +14,7 @@ return new class extends Migration
     {
         Schema::create('vehicles', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
+            $table->foreignIdFor(User::class)->nullable()->constrained()->nullOnDelete();
             $table->char('vin', 17)->unique();
             $table->string('license_plate')->unique();
             $table->string('manufacturer');
@@ -23,6 +23,7 @@ return new class extends Migration
             $table->decimal('battery_capacity_kwh', 6, 2);
             $table->decimal('ac_max_kw', 6, 2);
             $table->decimal('dc_max_kw', 6, 2);
+            $table->string('connector_type');
             $table->boolean('is_default')->default(false);
             $table->timestamps();
         });
