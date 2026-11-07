@@ -21,7 +21,7 @@ class VehicleController extends Controller
      */
     public function index()
     {
-        return $this->service->index();
+        return response()->json($this->service->index());
     }
 
     /**

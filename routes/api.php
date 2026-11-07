@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\ForgotPasswordController;
 use App\Http\Controllers\Api\ProfileController;
+use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\StationController;
 use App\Http\Controllers\Api\VehicleController;
 use App\Http\Controllers\Web\StripeController;
@@ -27,7 +28,7 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/profile', [ProfileController::class, 'getProfile']);
     Route::patch('/profile', [ProfileController::class, 'updateProfile']);
     Route::delete('/profile', [ProfileController::class, 'deleteAccount']);
-    Route::post("/stripe/webhook", [StripeController::class, "handle"]);
+    Route::post('/stripe/webhook', [StripeController::class, 'handle']);
     Route::get('/stations', [StationController::class, 'index']);
     Route::get('/stations/search', [StationController::class, 'searchByAddress']);
     Route::get('/vehicles', [VehicleController::class, 'index']);
@@ -35,4 +36,7 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/vehicles/detach', [VehicleController::class, 'detach']);
     Route::post('/vehicles/make-default', [VehicleController::class, 'makeDefault']);
     Route::post('/vehicles/remove-default', [VehicleController::class, 'removeDefault']);
+    Route::post('/reservations/choose-charger', [ReservationController::class, 'chooseCharger']);
+    Route::post('/reservations', [ReservationController::class, 'store']);
+    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy']);
 });
