@@ -11,3 +11,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('users:suspend-inactive')->daily();
+Schedule::command('charging:simulate')->everyTenMinutes();
+Schedule::command('reservations:process-no-shows')->everyMinute();

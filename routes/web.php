@@ -44,6 +44,7 @@ use App\Http\Controllers\user_interface\Toasts;
 use App\Http\Controllers\user_interface\TooltipsPopovers;
 use App\Http\Controllers\user_interface\Typography;
 use App\Http\Controllers\Web\ChargerManagementController;
+use App\Http\Controllers\Web\ChargingSessionManagementController;
 use App\Http\Controllers\Web\ConnectorManagementController;
 use App\Http\Controllers\Web\RoleManagementController;
 use App\Http\Controllers\Web\StationManagementController;
@@ -151,6 +152,10 @@ Route::prefix('/admin')->middleware(['auth', 'AdminOrStaff'])->group(function ()
     Route::delete('stations/{station}', [StationManagementController::class, 'destroy'])->name('stations.destroy');
 
     Route::get('chargers', [ChargerManagementController::class, 'index'])->name('chargers.index');
+    Route::get('charging-sessions', [ChargingSessionManagementController::class, 'index'])->name('charging-sessions.index');
+    Route::post('charging-sessions/{reservation}/start', [ChargingSessionManagementController::class, 'start'])->name('charging-sessions.start');
+    Route::post('charging-sessions/{reservation}/cancel', [ChargingSessionManagementController::class, 'cancel'])->name('charging-sessions.cancel');
+    Route::post('charging-sessions/{reservation}/stop', [ChargingSessionManagementController::class, 'stop'])->name('charging-sessions.stop');
     Route::post('chargers/attach', [ChargerManagementController::class, 'attach'])->name('chargers.attach');
     Route::post('chargers/{charger}/connectors', [ConnectorManagementController::class, 'store'])->name('chargers.connectors.store');
     Route::put('connectors/{connector}', [ConnectorManagementController::class, 'update'])->name('connectors.update');

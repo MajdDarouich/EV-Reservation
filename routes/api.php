@@ -38,5 +38,4 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/vehicles/remove-default', [VehicleController::class, 'removeDefault']);
     Route::post('/reservations/choose-charger', [ReservationController::class, 'chooseCharger']);
     Route::post('/reservations', [ReservationController::class, 'store']);
-    Route::delete('/reservations/{reservation}', [ReservationController::class, 'destroy']);
 });

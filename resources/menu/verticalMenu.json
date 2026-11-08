@@ -176,6 +176,12 @@
       "slug":"chargers.index"
     },
     {
+      "url":"/admin/charging-sessions",
+      "name":"Charging Sessions",
+      "icon":"menu-icon icon-base bx bx-battery-charging",
+      "slug":"charging-sessions.index"
+    },
+    {
       "url": "https://demos.themeselection.com/sneat-bootstrap-html-laravel-admin-template/demo-1/app/email",
       "name": "Email",
       "icon": "menu-icon icon-base bx bx-envelope",

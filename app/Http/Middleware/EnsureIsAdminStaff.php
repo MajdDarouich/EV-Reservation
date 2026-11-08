@@ -15,12 +15,12 @@ class EnsureIsAdminStaff
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if(!$request->user() || !$request->user()->hasAnyRole(['Super Admin', 'support staff', 'station manager'])) {
+        if (! $request->user() || ! $request->user()->hasAnyRole(['support staff', 'station manager', 'Super Admin'])) {
             return response()->json([
                 'message' => 'Unauthorized. Admin staff access only.',
             ], 403);
         }
-    
+
         return $next($request);
     }
 }

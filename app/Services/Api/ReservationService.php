@@ -41,6 +41,11 @@ class ReservationService
     {
         /** @var User $user */
         $user = Auth::user();
+        if ($user->no_show_count >= $user->no_show_limit) {
+            throw ValidationException::withMessages([
+                'reservation' => 'Reservations are temporarily suspended for this user. Please contact station administration.',
+            ]);
+        }
         $vehicle = $user->vehicles()
             ->where('model', $data['vehicle_name'])
             ->where('license_plate', $data['license_plate'])
@@ -154,7 +159,7 @@ class ReservationService
             $reservation->forceFill([
                 'status' => ReservationStatus::CANCELLED,
                 'cancelled_by' => (string) $user->id,
-                'cancellation_reason' => $isLateCancellation ? 'Late Cancellation' : null,
+                'cancellation_reason' => $isLateCancellation ? 'LateCancellation' : null,
                 'cancelled_at' => Carbon::now(),
             ])->save();
 
@@ -162,7 +167,6 @@ class ReservationService
                 $user->increment('no_show_count');
             }
 
-            $reservation->delete();
         });
 
         return $reservation->refresh();

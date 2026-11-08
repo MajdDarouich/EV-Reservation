@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ReservationStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Reservation extends Model
@@ -13,6 +14,7 @@ class Reservation extends Model
 
     protected $casts = [
         'status' => ReservationStatus::class,
+        'arrival_confirmed_at' => 'datetime',
     ];
 
     protected $fillable = [
@@ -22,6 +24,7 @@ class Reservation extends Model
         'date',
         'start_time',
         'arrival_deadline',
+        'arrival_confirmed_at',
         'current_SOC_at_booking',
         'target_SOC',
         'energy_required_kWh',
@@ -47,5 +50,10 @@ class Reservation extends Model
     public function connector(): BelongsTo
     {
         return $this->belongsTo(Connector::class);
+    }
+
+    public function chargingSession(): HasOne
+    {
+        return $this->hasOne(ChargingSession::class);
     }
 }

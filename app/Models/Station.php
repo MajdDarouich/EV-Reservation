@@ -21,6 +21,7 @@ class Station extends Model
         'default_grace_period_minutes',
         'default_overstay_fee_amount',
         'default_overstay_interval_minutes',
+        'price_per_kwh',
         'cancellation_window_minutes',
         'no_show_period_days',
         'avg_rating',
@@ -33,11 +34,11 @@ class Station extends Model
 
     protected $casts = [
         'status' => StationStatus::class,
+        'price_per_kwh' => 'decimal:2',
     ];
 
     public function chargers()
     {
         return $this->hasMany(Charger::class);
     }
-
 }

@@ -17,17 +17,17 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Reservation::class)->nullable()->constrained()->nullOnDelete();
             $table->time('actual_start_time');
-            $table->time('actual_end_time');
+            $table->time('actual_end_time')->nullable();
             $table->string('start_SOC');
             $table->string('current_SOC');
             $table->string('target_SOC');
             $table->decimal('energy_delivered_kWh', 8, 2);
             $table->decimal('actual_power_kW', 8, 2);
             $table->string('charging_status')->default(ChargingStatus::IN_PROGRESS->value);
-            $table->time('estimated_end_time');
-            $table->time('estimated_duration_minutes');
-            $table->string('cancellation_reason');
-            $table->string('cancelled_by');
+            $table->time('estimated_end_time')->nullable();
+            $table->unsignedInteger('estimated_duration_minutes')->nullable();
+            $table->string('cancellation_reason')->nullable();
+            $table->string('cancelled_by')->nullable();
             $table->timestamps();
         });
     }
