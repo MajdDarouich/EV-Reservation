@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Enums\ChargingStatus;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class ChargingSession extends Model
 {
@@ -43,5 +44,10 @@ class ChargingSession extends Model
     public function reservation(): BelongsTo
     {
         return $this->belongsTo(Reservation::class);
+    }
+
+    public function payment(): HasOne
+    {
+        return $this->hasOne(Payment::class);
     }
 }

@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthenticationController;
 use App\Http\Controllers\Api\ForgotPasswordController;
+use App\Http\Controllers\Api\PaymentController;
 use App\Http\Controllers\Api\ProfileController;
 use App\Http\Controllers\Api\ReservationController;
 use App\Http\Controllers\Api\StationController;
@@ -23,12 +24,17 @@ Route::middleware('guest:api')->group(function () {
     Route::post('/reset-password', [ForgotPasswordController::class, 'resetPassword']);
 });
 
+Route::post('/stripe/webhook', [StripeController::class, 'handle']);
+
 Route::middleware('auth:api')->group(function () {
     Route::post('/logout', [AuthenticationController::class, 'logout']);
     Route::get('/profile', [ProfileController::class, 'getProfile']);
     Route::patch('/profile', [ProfileController::class, 'updateProfile']);
     Route::delete('/profile', [ProfileController::class, 'deleteAccount']);
-    Route::post('/stripe/webhook', [StripeController::class, 'handle']);
+    Route::post('/charging-sessions/{chargingSession}/payment/cash', [PaymentController::class, 'cash']);
+    Route::post('/charging-sessions/{chargingSession}/payment/stripe', [PaymentController::class, 'stripe']);
+    Route::post('/payments/{payment}/cash/confirm', [PaymentController::class, 'confirmCash'])
+        ->middleware('AdminOrStaff');
     Route::get('/stations', [StationController::class, 'index']);
     Route::get('/stations/search', [StationController::class, 'searchByAddress']);
     Route::get('/vehicles', [VehicleController::class, 'index']);
